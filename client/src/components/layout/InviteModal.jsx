@@ -2,71 +2,139 @@ import React from 'react';
 import { useOrbit } from '../../context/OrbitContext';
 
 export function InviteModal() {
-  const { groupId, groupName, inviteModalOpen, setInviteModalOpen, addToast } = useOrbit();
+  const {
+    groupId,
+    groupName,
+    inviteModalOpen,
+    setInviteModalOpen,
+    addToast
+  } = useOrbit();
 
   if (!inviteModalOpen || !groupId) return null;
 
   const inviteLink =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}${window.location.pathname}#g=${encodeURIComponent(
-          groupId
-        )}&n=${encodeURIComponent(groupName || '')}`
-      : '';
+    `${window.location.origin}${window.location.pathname}` +
+    `#g=${encodeURIComponent(groupId)}` +
+    `&n=${encodeURIComponent(groupName || '')}`;
 
-  const handleCopy = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(inviteLink).then(() => {
+  const handleClose = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log('INVITE MODAL: CLOSE CLICKED');
+
+    setInviteModalOpen(false);
+  };
+
+  const handleCopy = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log('INVITE MODAL: COPY CLICKED');
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+
+      addToast('Invite link copied!', 'success');
+
+      console.log('INVITE MODAL: COPY SUCCESS');
+    } catch (error) {
+      console.error('Clipboard error:', error);
+
+      // Fallback
+      const textarea = document.createElement('textarea');
+
+      textarea.value = inviteLink;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '0';
+
+      document.body.appendChild(textarea);
+
+      textarea.focus();
+      textarea.select();
+
+      try {
+        document.execCommand('copy');
         addToast('Invite link copied!', 'success');
-      });
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        addToast('Copy failed. Please copy the link manually.', 'error');
+      }
+
+      document.body.removeChild(textarea);
     }
   };
 
   return (
     <div
       id="invite-modal"
-      className="show"
+      onClick={handleClose}
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1100,
+        zIndex: 999999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
-        paddingTop: 'calc(20px + var(--sat))',
-        paddingBottom: 'calc(20px + var(--sab))',
         background: 'rgba(4,7,14,.6)',
-        backdropFilter: 'blur(4px)',
-        overflowY: 'auto'
+        backdropFilter: 'blur(4px)'
       }}
     >
       <div
         className="modal-card glass"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
         style={{
+          position: 'relative',
+          zIndex: 1000000,
           width: '100%',
           maxWidth: '400px',
           borderRadius: '20px',
           padding: '26px',
-          margin: 'auto'
+          pointerEvents: 'auto'
         }}
       >
-        <h3 style={{ fontSize: '16px', marginBottom: '4px' }}>Invite your group</h3>
-<button
-  className="modal-close"
-  onClick={() => setInviteModalOpen(false)}
-  style={{
-    position: 'absolute',
-    top: '12px',
-    right: '12px',
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--muted)',
-    fontSize: '20px',
-    cursor: 'pointer',
-  }}
->
-  ✕
-</button>
+
+        {/* CLOSE X */}
+
+        <button
+          type="button"
+          className="modal-close"
+          onClick={handleClose}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            zIndex: 1000001,
+            width: '34px',
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--muted)',
+            fontSize: '20px',
+            cursor: 'pointer',
+            pointerEvents: 'auto'
+          }}
+        >
+          ✕
+        </button>
+
+        <h3
+          style={{
+            fontSize: '16px',
+            marginBottom: '4px',
+            paddingRight: '35px'
+          }}
+        >
+          Invite your group
+        </h3>
+
         <p
           style={{
             fontSize: '12px',
@@ -76,9 +144,13 @@ export function InviteModal() {
           }}
         >
           Share this link — it opens the app already connected to{' '}
-          <b style={{ color: 'var(--text)' }}>{groupName || groupId}</b>. Anyone with the link just
-          adds their name & photo to join.
+          <b style={{ color: 'var(--text)' }}>
+            {groupName || groupId}
+          </b>
+          .
         </p>
+
+        {/* LINK */}
 
         <div
           className="link-box"
@@ -97,6 +169,7 @@ export function InviteModal() {
             type="text"
             readOnly
             value={inviteLink}
+            onClick={(e) => e.currentTarget.select()}
             style={{
               flex: 1,
               minWidth: 0,
@@ -105,13 +178,18 @@ export function InviteModal() {
               outline: 'none',
               color: 'var(--muted)',
               fontSize: '11px',
-              fontFamily: "'JetBrains Mono', monospace"
+              fontFamily: "'JetBrains Mono', monospace",
+              pointerEvents: 'auto'
             }}
           />
+
           <button
+            type="button"
             className="copy-btn"
             onClick={handleCopy}
             style={{
+              position: 'relative',
+              zIndex: 1000001,
               background: 'rgba(0,229,255,.12)',
               color: 'var(--cyan)',
               border: '1px solid rgba(0,229,255,.3)',
@@ -121,13 +199,15 @@ export function InviteModal() {
               cursor: 'pointer',
               fontWeight: 600,
               fontFamily: "'JetBrains Mono', monospace",
-              flex: 'none',
-              transition: '.2s'
+              pointerEvents: 'auto',
+              touchAction: 'manipulation'
             }}
           >
             COPY
           </button>
         </div>
+
+        {/* CODE */}
 
         <div
           style={{
@@ -159,9 +239,16 @@ export function InviteModal() {
           {groupId}
         </div>
 
-        <button className="btn-ghost" onClick={() => setInviteModalOpen(false)}>
+        {/* CLOSE */}
+
+        <button
+          type="button"
+          className="btn-ghost"
+          onClick={handleClose}
+        >
           Close
         </button>
+
       </div>
     </div>
   );
