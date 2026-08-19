@@ -1,0 +1,22 @@
+# Frontend dependencies
+client/node_modules/
+
+# Frontend build
+client/dist/
+
+# Backend build
+server/target/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

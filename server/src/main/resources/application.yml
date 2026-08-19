@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: orbit-server
+  jackson:
+    default-property-inclusion: non_null
+
+orbit:
+  firebase:
+    database-url: "https://orbitpoint-c9ee5-default-rtdb.firebaseio.com"
+    # Optional path to serviceAccountKey.json if full admin credentials are used
+    service-account-path: ""
+  osrm:
+    base-url: "https://routing.openstreetmap.de/routed-foot/route/v1/foot/"
+    timeout-ms: 8000
+    cache-duration-seconds: 15

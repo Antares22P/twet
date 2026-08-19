@@ -1,0 +1,989 @@
+:root {
+  --bg: #070a12;
+  --bg-2: #0b1020;
+  --surface: rgba(16, 22, 38, 0.68);
+  --surface-solid: #111729;
+  --border: rgba(140, 160, 200, 0.14);
+  --border-soft: rgba(140, 160, 200, 0.08);
+  --text: #e9edf5;
+  --muted: #7c8aa3;
+  --muted-2: #525f78;
+  --cyan: #00e5ff;
+  --violet: #7c5cff;
+  --danger: #ff4d6d;
+  --success: #3ee6a8;
+  --amber: #ffb703;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glass panel */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Animations */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes beamFlow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes destDrop {
+  from {
+    transform: translateY(-24px) scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #0b0f1a !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(7, 10, 18, 0.55) !important;
+  color: var(--muted-2) !important;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px !important;
+  backdrop-filter: blur(6px);
+}
+
+.leaflet-control-attribution a {
+  color: var(--muted) !important;
+}
+
+.leaflet-control-zoom {
+  display: none;
+}
+
+.leaflet-tile-pane {
+  filter: saturate(1.05) brightness(0.95);
+}
+
+/* Custom Leaflet Markers */
+.orbit-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-marker .ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--ring, #00e5ff);
+  animation: markerPulse 2.2s ease-out infinite;
+}
+
+.orbit-marker .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ring, #00e5ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #04121a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 14px var(--ring-glow, rgba(0, 229, 255, 0.5));
+  background: var(--ring, #00e5ff);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.orbit-marker .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orbit-marker .heading-arrow {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 3;
+  transform-origin: 50% 24px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--ring, #00e5ff);
+  filter: drop-shadow(0 0 3px var(--ring-glow, rgba(0, 229, 255, 0.6)));
+}
+
+.orbit-marker .speed-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -8px;
+  z-index: 3;
+  background: var(--bg-2);
+  border: 1.5px solid var(--ring, #00e5ff);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.orbit-marker .speed-badge span {
+  font-size: 6.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.orbit-marker .label {
+  position: absolute;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(7, 10, 18, 0.8);
+  padding: 2px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border-soft);
+  z-index: 2;
+}
+
+.dest-marker {
+  animation: destDrop 0.45s cubic-bezier(0.3, 1.4, 0.4, 1);
+  transform-origin: bottom center;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+}
+
+.dist-chip {
+  background: rgba(7, 10, 18, 0.88);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-overlay-pane path.link-beam {
+  stroke-dasharray: 7 7;
+  filter: drop-shadow(0 0 5px rgba(62, 230, 168, 0.65));
+  animation: beamFlow 0.9s linear infinite;
+}
+
+.link-hub {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+.link-hub-core {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 12px var(--success);
+}
+
+.link-hub-ring {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--success);
+  animation: markerPulse 1.5s ease-out infinite;
+}
+
+.link-hub-chip {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(7, 10, 18, 0.9);
+  border: 1px solid rgba(62, 230, 168, 0.45);
+  color: var(--success);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.orbit-marker .link-badge {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  z-index: 4;
+  background: var(--success);
+  border: 2px solid var(--bg-2);
+  box-shadow: 0 0 8px var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-marker .link-badge::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--success);
+  animation: pulseRing 1.6s ease-out infinite;
+}
+
+.dest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 3px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--amber);
+}
+
+.dest-clear {
+  color: var(--danger);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  flex: none;
+  padding: 4px 2px;
+  margin: -4px -2px;
+}
+
+/* Spinner */
+.spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(4, 18, 26, 0.35);
+  border-top-color: #04121a;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: 0.2px;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: #04121a;
+  box-shadow: 0 8px 26px rgba(0, 229, 255, 0.22);
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(0, 229, 255, 0.32);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 8px;
+  transition: 0.2s;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: 0.2s;
+  flex: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.08);
+}
+
+.icon-btn.danger:hover {
+  color: var(--danger);
+  border-color: rgba(255, 77, 109, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.1);
+}
+
+.icon-btn.on {
+  color: var(--cyan);
+  border-color: rgba(0, 229, 255, 0.4);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* Responsive styles */
+@media (max-width: 720px) {
+  .field input,
+  .field textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ============================================================ */
+/*  CONTROL BAR — Glass Buttons & Decorative Art                */
+/* ============================================================ */
+
+/* Shimmer keyframe for decorative effects */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.8; }
+}
+
+@keyframes orbitSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* --- Control bar container --- */
+#controls {
+  position: relative;
+  overflow: visible;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: rgba(7, 10, 18, 0.6);
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* Decorative glow art behind the control bar */
+#controls::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 32px;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.08), transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(124, 92, 255, 0.08), transparent 60%);
+  z-index: -1;
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+/* Decorative orbiting dot */
+#controls::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0, 229, 255, 0.3);
+  pointer-events: none;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* --- Control button base --- */
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: 1px solid rgba(140, 160, 200, 0.15);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+/* Glass shimmer on hover */
+.ctrl-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.ctrl-btn:hover::before {
+  opacity: 1;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 229, 255, 0.35);
+  color: var(--text);
+  box-shadow:
+    0 0 0 3px rgba(0, 229, 255, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.ctrl-btn:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Active/on state --- */
+.ctrl-btn.on {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.4);
+  color: var(--cyan);
+  box-shadow:
+    0 0 0 3px rgba(0, 229, 255, 0.08),
+    0 0 12px rgba(0, 229, 255, 0.1) inset;
+}
+
+.ctrl-btn.on:hover {
+  background: rgba(0, 229, 255, 0.15);
+  box-shadow:
+    0 0 0 4px rgba(0, 229, 255, 0.1),
+    0 0 16px rgba(0, 229, 255, 0.15) inset;
+}
+
+/* --- Primary invite button (gradient) --- */
+.ctrl-btn.primary {
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  border: none;
+  color: #04121a;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow:
+    0 4px 16px rgba(0, 229, 255, 0.25),
+    0 0 24px rgba(124, 92, 255, 0.15);
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+.ctrl-btn.primary::before {
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+}
+
+.ctrl-btn.primary:hover {
+  color: #04121a;
+  border: none;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 8px 24px rgba(0, 229, 255, 0.35),
+    0 0 32px rgba(124, 92, 255, 0.2);
+}
+
+.ctrl-btn.primary:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* --- Separator --- */
+.ctrl-sep {
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(140, 160, 200, 0.25),
+    transparent
+  );
+  margin: 0 4px;
+  flex: none;
+}
+
+/* --- Button label --- */
+.ctrl-btn .lbl {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+
+/* ============================================================ */
+/*  TOPBAR — Enhanced glass & decorative art                    */
+/* ============================================================ */
+
+.topbar-left {
+  position: relative;
+  overflow: visible;
+}
+
+/* Decorative gradient streak behind brand */
+.topbar-left::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 10% 50%, rgba(0, 229, 255, 0.06), transparent 50%),
+    radial-gradient(ellipse at 90% 50%, rgba(124, 92, 255, 0.05), transparent 50%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Live pulse dot */
+.live-pulse {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: glowPulse 1.5s ease-in-out infinite;
+  flex: none;
+}
+
+
+/* ============================================================ */
+/*  SIDEBAR — Polish & scrollbar art                            */
+/* ============================================================ */
+
+#sidebar {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative side accent line */
+#sidebar::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(0, 229, 255, 0.3),
+    rgba(124, 92, 255, 0.3),
+    transparent
+  );
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Custom scrollbar for members list */
+#members-list::-webkit-scrollbar {
+  width: 4px;
+}
+#members-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+#members-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.2);
+  border-radius: 4px;
+}
+#members-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.35);
+}
+
+/* Member card hover */
+.member-card {
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.member-card:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(0, 229, 255, 0.2) !important;
+  transform: translateX(-2px);
+}
+
+/* Mobile sheet handle */
+.sb-handle {
+  display: none;
+  width: 36px;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 auto 10px;
+  cursor: grab;
+  transition: background 0.2s;
+}
+.sb-handle:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+@media (max-width: 720px) {
+  .sb-handle { display: block; }
+}
+
+
+/* ============================================================ */
+/*  STATS STRIP — Polish                                        */
+/* ============================================================ */
+
+#stats-strip {
+  position: relative;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  background: rgba(7, 10, 18, 0.55);
+  border: 1px solid rgba(140, 160, 200, 0.1);
+}
+
+/* Subtle top highlight */
+#stats-strip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 229, 255, 0.2),
+    transparent
+  );
+  pointer-events: none;
+}
+
+
+/* ============================================================ */
+/*  MODAL — Invite modal polish                                 */
+/* ============================================================ */
+
+#invite-modal {
+  animation: fadeDown 0.3s ease-out forwards;
+}
+
+.modal-card {
+  position: relative;
+  animation: cardIn 0.35s ease;
+}
+
+/* Decorative corner accents on modal */
+.modal-card::before,
+.modal-card::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.modal-card::before {
+  top: 8px;
+  left: 8px;
+  border-top: 2px solid var(--cyan);
+  border-left: 2px solid var(--cyan);
+  border-radius: 4px 0 0 0;
+}
+
+.modal-card::after {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 2px solid var(--violet);
+  border-right: 2px solid var(--violet);
+  border-radius: 0 0 4px 0;
+}
+
+/* Close button styling */
+.modal-close {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--muted);
+  transition: color 0.2s, transform 0.2s;
+}
+.modal-close:hover {
+  color: var(--text);
+  transform: rotate(90deg);
+}
+
+/* Copy button hover glow */
+.copy-btn:hover {
+  background: rgba(0, 229, 255, 0.2) !important;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+}
+
+/* Group code display shimmer */
+.code-display {
+  position: relative;
+  overflow: hidden;
+}
+.code-display::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(124, 92, 255, 0.08) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+
+/* ============================================================ */
+/*  ICON BUTTONS — Enhanced hover art                           */
+/* ============================================================ */
+
+.icon-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Inner glow ring on hover */
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.3s;
+  pointer-events: none;
+}
+
+.icon-btn:hover::after {
+  border-color: rgba(0, 229, 255, 0.15);
+}
+
+.icon-btn.on::after {
+  border-color: rgba(0, 229, 255, 0.2);
+}
+
+
+/* ============================================================ */
+/*  TOAST — Animation enhancements                              */
+/* ============================================================ */
+
+.toast {
+  animation: toastIn 0.3s ease-out, toastOut 0.2s ease-in 2.5s forwards;
+}
+
+
+/* ============================================================ */
+/*  RESPONSIVE — Mobile polish                                  */
+/* ============================================================ */
+
+@media (max-width: 720px) {
+  #controls {
+    gap: 6px;
+    padding: 7px;
+    border-radius: 16px;
+  }
+
+  .ctrl-btn {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+
+  .ctrl-btn .lbl {
+    display: none;
+  }
+
+  #sidebar {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 55vh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(0);
+  }
+
+  #sidebar.collapsed {
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}
